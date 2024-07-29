@@ -1,11 +1,12 @@
 import { Injectable, signal } from '@angular/core';
-import { InputBuilderComponent } from '../input-builder/input-builder.component';
+import { FieldBuilderComponent } from '../field-builder/field-builder.component';
+import { BaseFormFieldComponent } from '../base-form-field/base-form-field.component';
 
 @Injectable()
 export class DynamicFormBuilderService {
-  inputBuilders = signal<InputBuilderComponent[]>([]);
+  inputBuilders = signal<BaseFormFieldComponent[]>([]);
 
-  addInput(inputBuilder: InputBuilderComponent): void {
+  addInput(inputBuilder: BaseFormFieldComponent): void {
     this.inputBuilders.update((inputs) => [...inputs, inputBuilder]);
   }
 

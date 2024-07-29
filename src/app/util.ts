@@ -1,5 +1,6 @@
 import {
   AbstractControl,
+  ControlContainer,
   FormArray,
   FormControl,
   FormGroup,
@@ -8,6 +9,7 @@ import {
   isFormGroup,
 } from '@angular/forms';
 import { DynamicFormInput, FormErrors } from './model';
+import { Optional, SkipSelf } from '@angular/core';
 
 /**
  * Recursively extracts all validation errors from the given FormGroup while preserving their structure.
@@ -129,3 +131,26 @@ function createControl(c: DynamicFormInput): AbstractControl {
   // Create a nested FormGroup if fieldType is 'GROUP'
   return createDynamicForm(c.children ?? []);
 }
+
+/**
+ * This provider connects child components' form controls to their parent form group.
+ * It ensures that the parent form group is available in the child components for proper form handling.
+ *
+ * Inspired by: https://nevzatopcu.medium.com/angular-child-components-with-reactive-forms-fbf4563b304c
+ *
+ * Usage:
+ * - Add this provider to the `providers` array of a child component's decorator to enable
+ *   the child component to access and interact with the parent form group.
+ */
+export const parentFormGroupProvider = [
+  {
+    provide: ControlContainer,
+    useFactory: (container: ControlContainer) => {
+      if (!container) {
+        throw new Error('I need a FormGroup instance');
+      }
+      return container;
+    },
+    deps: [[new SkipSelf(), new Optional(), ControlContainer]],
+  },
+];

@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { DynamicFormInput } from '../model';
 import { JsonPipe } from '@angular/common';
-import { InputBuilderComponent } from '../input-builder/input-builder.component';
+import { FieldBuilderComponent } from '../field-builder/field-builder.component';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { DynamicFormBuilderService } from './reactive-dynamic-form-builder.service';
 import {
@@ -23,7 +23,7 @@ import { createDynamicForm, getErrors } from '../util';
 @Component({
   selector: 'app-dynamic-form-builder',
   standalone: true,
-  imports: [InputBuilderComponent, ReactiveFormsModule, JsonPipe],
+  imports: [FieldBuilderComponent, ReactiveFormsModule, JsonPipe],
   providers: [DynamicFormBuilderService],
   templateUrl: './dynamic-form-builder.component.html',
 })
