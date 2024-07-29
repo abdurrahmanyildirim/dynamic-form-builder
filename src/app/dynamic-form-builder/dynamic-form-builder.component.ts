@@ -1,27 +1,24 @@
 import {
+  AfterViewInit,
   Component,
-  computed,
+  DestroyRef,
   effect,
   inject,
   input,
   signal,
   untracked,
-  viewChildren,
 } from '@angular/core';
-import { vestForms, DeepPartial, DeepRequired } from 'ngx-vest-forms';
-import { MatFormField, MatInput, MatLabel } from '@angular/material/input';
-import { DynamicFormInput } from './model';
-import { JsonPipe, KeyValuePipe } from '@angular/common';
+import { DynamicFormInput } from '../model';
+import { JsonPipe } from '@angular/common';
 import { InputBuilderComponent } from '../input-builder/input-builder.component';
 import {
   AbstractControl,
-  FormArray,
   FormBuilder,
-  FormControl,
-  FormGroup,
   ReactiveFormsModule,
 } from '@angular/forms';
 import { DynamicFormBuilderService } from './reactive-dynamic-form-builder.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { debounceTime, distinctUntilChanged, startWith } from 'rxjs';
 
 @Component({
   selector: 'app-reactive-dynamic-form-builder',
@@ -30,20 +27,26 @@ import { DynamicFormBuilderService } from './reactive-dynamic-form-builder.servi
   providers: [DynamicFormBuilderService],
   templateUrl: './dynamic-form-builder.component.html',
 })
-export class DynamicFormBuilderComponent {
+export class DynamicFormBuilderComponent implements AfterViewInit {
   fb = inject(FormBuilder);
+  destroyRef = inject(DestroyRef);
   dynamicFormBuilderService = inject(DynamicFormBuilderService);
-  myForm = this.fb.group({});
+
+  mainForm = this.fb.group({});
   dynamicFormConfig = input<DynamicFormInput[]>([]);
+  /**
+   * Flag to detect if form is ready.
+   * Don't init UI till form ready.
+   */
   formReady = signal(false);
+
   configEffect = effect(() => {
     const config = this.dynamicFormConfig();
     untracked(() => {
       this.formReady.set(false);
-      this.dynamicFormBuilderService.inputs.set([]);
+      this.dynamicFormBuilderService.inputBuilders.set([]);
       this.buildForm(config);
-      this.myForm.valueChanges.subscribe((ff) => console.log(ff));
-      this.myForm.patchValue(this.defaultValue());
+      this.mainForm.patchValue(this.defaultValue());
       this.formReady.set(true);
     });
   });
@@ -52,17 +55,17 @@ export class DynamicFormBuilderComponent {
   buildForm(config: DynamicFormInput[]): any {
     config.forEach((c) => {
       const control = this.createControl(c);
-      this.myForm.addControl(c.key, control);
+      this.mainForm.addControl(c.key, control);
     });
   }
 
   createControl(c: DynamicFormInput): AbstractControl {
     if (!c.fieldType) {
-      return new FormControl();
+      return this.fb.control('');
     }
     if (c.fieldType === 'ARRAY') {
       // TODO: Not sure how this will work. test this.
-      return new FormArray([]);
+      return this.fb.array([]);
     }
     const fg = this.fb.group({});
     c.children?.forEach((c) => {
@@ -70,5 +73,21 @@ export class DynamicFormBuilderComponent {
       fg.addControl(c.key, ct);
     });
     return fg;
+  }
+
+  ngAfterViewInit(): void {
+    this.mainForm.valueChanges
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        startWith(this.defaultValue()),
+        // Make sure UI fully initialized and improve the performance
+        debounceTime(50),
+        distinctUntilChanged(),
+      )
+      .subscribe((v) => {
+        this.dynamicFormBuilderService.adjustInputs(
+          this.mainForm.getRawValue(),
+        );
+      });
   }
 }

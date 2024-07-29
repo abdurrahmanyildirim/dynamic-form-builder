@@ -1,9 +1,9 @@
-@if (input(); as inp) {
+@if (!hide() && inputConfig(); as inp) {
   <!-- TODO: Handle array too. It is not handled yet -->
   @if (inp.fieldType === "GROUP") {
-    <div [formGroupName]="key()">
+    <div [formGroupName]="inp.key">
       @for (item of inp.children; track item.key) {
-        <app-input-builder [input]="item" [key]="item.key" />
+        <app-input-builder [inputConfig]="item" />
       }
     </div>
   } @else {
@@ -13,8 +13,8 @@
         <input
           matInput
           [type]="inp.type?.toLowerCase() ?? 'text'"
-          [name]="key()"
-          [formControlName]="key()"
+          [name]="inp.key"
+          [formControlName]="inp.key"
         />
       </mat-form-field>
     } @else {
@@ -32,14 +32,14 @@
               [step]="inp.step ?? 1"
               [discrete]="true"
             >
-              <input matSliderThumb [formControlName]="key()" #slider />
+              <input matSliderThumb [formControlName]="inp.key" #slider />
             </mat-slider>
           </div>
         }
         @case ("SELECT") {
           <mat-form-field>
             <mat-label> {{ inp.label ?? inp.key }} </mat-label>
-            <mat-select [formControlName]="key()" required>
+            <mat-select [formControlName]="inp.key" required>
               @for (item of inp.options; track item.value) {
                 <mat-option [value]="item.value">{{ item.label }} </mat-option>
               }
@@ -51,7 +51,7 @@
             <mat-label> {{ inp.label ?? inp.key }} </mat-label>
             <input
               matInput
-              [formControlName]="key()"
+              [formControlName]="inp.key"
               [matDatepicker]="picker"
             />
             <mat-datepicker-toggle matIconSuffix [for]="picker" />

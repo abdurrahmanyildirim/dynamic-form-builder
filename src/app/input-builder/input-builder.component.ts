@@ -7,6 +7,10 @@ import {
   inject,
   effect,
   signal,
+  OnInit,
+  AfterViewInit,
+  OnDestroy,
+  DestroyRef,
 } from '@angular/core';
 import {
   ControlContainer,
@@ -20,10 +24,11 @@ import { MatSelect, MatOption } from '@angular/material/select';
 import { MatIcon } from '@angular/material/icon';
 import { MatIconButton } from '@angular/material/button';
 import { MatSuffix } from '@angular/material/input';
-import { DynamicFormInput } from '../dynamic-form-builder/model';
+import { DynamicFormInput } from '../model';
 
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { provideNativeDateAdapter } from '@angular/material/core';
+import { DynamicFormBuilderService } from '../dynamic-form-builder/reactive-dynamic-form-builder.service';
 
 /**
  * This allow us to connect controls with parent form groups.
@@ -62,26 +67,48 @@ export const parentFormGroupProvider = [
   providers: [provideNativeDateAdapter()],
   viewProviders: [parentFormGroupProvider],
 })
-export class InputBuilderComponent {
+export class InputBuilderComponent implements OnInit, AfterViewInit, OnDestroy {
   controlContainer = inject(ControlContainer);
+  destroyRef = inject(DestroyRef);
+  dynamicFormBuilderService = inject(DynamicFormBuilderService);
 
-  key = input.required<string>();
-  input = input.required<DynamicFormInput>();
+  hide = signal(false);
+
+  inputConfig = input.required<DynamicFormInput>();
 
   // Form group/array/control of current input
   control = computed(() => {
-    const key = this.key();
-    let control = undefined;
+    const key = this.inputConfig().key;
     if (isFormGroup(this.controlContainer.control)) {
-      control = this.controlContainer.control.controls[key];
+      return this.controlContainer.control.controls[key];
     }
-    return control;
+    return this.controlContainer.control;
   });
 
-  disabled = signal(false);
-  hide = signal(false);
-
   isGeneralInput = computed(() =>
-    ['TEXT', 'NUMBER'].includes(this.input().type ?? ''),
+    ['TEXT', 'NUMBER'].includes(this.inputConfig().type ?? ''),
   );
+
+  ngOnInit(): void {
+    // Save all created inputs to service.
+    this.dynamicFormBuilderService.addInput(this);
+    const ct = this.control();
+    if (ct) {
+      this.inputConfig().hooks?.onInit?.(ct, this.destroyRef);
+    }
+  }
+
+  ngAfterViewInit(): void {
+    const ct = this.control();
+    if (ct) {
+      this.inputConfig().hooks?.afterViewInit?.(ct, this.destroyRef);
+    }
+  }
+
+  ngOnDestroy(): void {
+    const ct = this.control();
+    if (ct) {
+      this.inputConfig().hooks?.onDestroy?.(ct);
+    }
+  }
 }

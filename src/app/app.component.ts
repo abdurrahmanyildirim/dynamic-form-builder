@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { DynamicFormBuilderComponent } from './dynamic-form-builder/dynamic-form-builder.component';
-import { DynamicFormInput } from './dynamic-form-builder/model';
+import { DynamicFormInput } from './model';
 
 @Component({
   selector: 'app-root',
@@ -80,11 +80,17 @@ export class AppComponent {
       key: 'age',
       label: 'Age',
       type: 'SLIDER',
+      expressions: {
+        disable: (value) => value.gender === 'female',
+      },
     },
     {
       key: 'birthDate',
       label: 'Birth Date',
       type: 'DATE',
+      expressions: {
+        hide: (value) => value.gender === 'male',
+      },
     },
   ] satisfies DynamicFormInput[];
 
