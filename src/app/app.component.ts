@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { DynamicFormBuilderComponent } from './dynamic-form-builder/dynamic-form-builder.component';
-import { DynamicFormInput, FormErrors } from './model';
+import { DynamicFormInput, ReactiveFormErrors } from './model';
 import { Validators } from '@angular/forms';
 
 type MyModel = {
@@ -59,12 +59,24 @@ export class AppComponent {
           key: 'firstName',
           label: 'First Name',
           type: 'TEXT',
-          validators: [Validators.minLength(3), Validators.maxLength(10)],
+          // validators: [Validators.minLength(3), Validators.maxLength(10)],
         },
         {
           key: 'lastName',
           label: 'Last Name',
           type: 'TEXT',
+          validators: [
+            {
+              message: 'Last Name cant be lesser than 3',
+              key: 'minLength',
+              validator: Validators.minLength(3),
+            },
+            {
+              message: 'Last Name cant be bigger than 10',
+              key: 'maxLength',
+              validator: Validators.maxLength(10),
+            },
+          ],
         },
         {
           key: 'contact',
@@ -89,6 +101,13 @@ export class AppComponent {
                   key: 'postCode',
                   label: 'Post Code',
                   type: 'NUMBER',
+                  validators: [
+                    {
+                      message: 'Post code is required',
+                      key: 'required',
+                      validator: Validators.required,
+                    },
+                  ],
                 },
               ],
             },
@@ -104,7 +123,14 @@ export class AppComponent {
       expressions: {
         disable: (value) => value.gender === 'female',
       },
-      validators: [Validators.min(10)],
+      // validators: [Validators.min(10)],
+      validators: [
+        {
+          message: 'Min age is 10',
+          key: 'min',
+          validator: Validators.min(10),
+        },
+      ],
     },
     {
       key: 'birthDate',
@@ -131,7 +157,7 @@ export class AppComponent {
     },
   } satisfies MyModel;
 
-  onErrors(e: FormErrors): void {
+  onErrors(e: ReactiveFormErrors): void {
     console.log(e);
   }
 }

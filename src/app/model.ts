@@ -36,8 +36,11 @@ export interface DynamicFormInputBase<T = any> {
   /**
    * Can be passed any angular validation.
    */
-  validators?: ValidatorFn | ValidatorFn[];
-  asyncValidators?: AsyncValidatorFn | AsyncValidatorFn[];
+  validators?: { message: string; key: string; validator: ValidatorFn }[];
+  // asyncValidators?: AsyncValidatorFn | AsyncValidatorFn[];
+  /**
+   * Style Classes for the field
+   */
   class?: string[];
 }
 
@@ -64,6 +67,22 @@ export type DynamicFormInputTypes =
   | 'SLIDER'
   | 'DATE';
 
-export type FormErrors = {
-  [key: string]: Object;
+export type ReactiveFormErrors = {
+  [path: string]: Object;
 };
+
+export type FormErrorMessages = {
+  [path: string]: {
+    key: string;
+    message: string;
+  };
+};
+
+export type FormErrors = FormError[];
+
+export interface FormError {
+  // id?: UUID; // if id is provided for a field
+  path: string; // like form.name.firstName or form.addresses[0].street
+  key: string; // e.g. "required", "customValidatorKey"
+  message: string; // "hey dude something is wrong at your form"
+}

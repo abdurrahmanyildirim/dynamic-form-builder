@@ -8,7 +8,7 @@ import {
   isFormControl,
   isFormGroup,
 } from '@angular/forms';
-import { DynamicFormInput, FormErrors } from './model';
+import { DynamicFormInput, ReactiveFormErrors } from './model';
 import { Optional, SkipSelf } from '@angular/core';
 
 /**
@@ -40,11 +40,14 @@ import { Optional, SkipSelf } from '@angular/core';
  * }
  * ```
  */
-export function getErrors(form: FormGroup): FormErrors {
-  let errors = {} as FormErrors;
+export function getReactiveFormErrors(
+  form: FormGroup,
+  path?: string,
+): ReactiveFormErrors {
+  let errors = {} as ReactiveFormErrors;
   Object.entries(form.controls).forEach(([key, ct]) => {
     if (ct.invalid) {
-      errors = getError(ct, errors, key);
+      errors = getReactiveFormError(ct, errors, key, path);
     }
   });
   return errors;
@@ -63,19 +66,26 @@ export function getErrors(form: FormGroup): FormErrors {
  * @param key The key representing the name or index of the control in the errorList.
  * @returns The updated error list containing errors for the provided control.
  */
-function getError(
+function getReactiveFormError(
   ct: AbstractControl,
-  errorList: FormErrors,
+  errorList: ReactiveFormErrors,
   key: string,
-): any {
+  path?: string,
+): ReactiveFormErrors {
+  const newPath = path ? path + '.' + key : key;
   if (isFormControl(ct) && ct.errors) {
-    errorList[key] = ct.errors;
+    errorList[newPath] = ct.errors;
   }
   if (isFormGroup(ct) && ct.invalid) {
-    errorList[key] = getErrors(ct);
+    errorList = { ...errorList, ...getReactiveFormErrors(ct, newPath) };
   }
   if (isFormArray(ct)) {
-    errorList[key] = ct.controls.map((c, i) => getError(c, {}, i + ''));
+    errorList = {
+      ...errorList,
+      ...ct.controls.map((c, i) =>
+        getReactiveFormError(c, {}, i + '', newPath),
+      ),
+    };
   }
   return errorList;
 }
@@ -96,8 +106,11 @@ export function createDynamicForm(config: DynamicFormInput[]): FormGroup {
 
   config?.forEach((c) => {
     const control = createControl(c);
-    control.addValidators(c.validators ?? []);
-    control.addAsyncValidators(c.asyncValidators ?? []);
+    // control.addValidators(c.validators ?? []);
+    c.validators?.forEach((v) => {
+      control.addValidators(v.validator);
+    });
+    // control.addAsyncValidators(c.asyncValidators ?? []);
     fg.addControl(c.key, control);
   });
 

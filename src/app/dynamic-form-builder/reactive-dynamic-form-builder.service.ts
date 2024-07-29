@@ -4,10 +4,10 @@ import { BaseFormFieldComponent } from '../base-form-field/base-form-field.compo
 
 @Injectable()
 export class DynamicFormBuilderService {
-  inputBuilders = signal<BaseFormFieldComponent[]>([]);
+  formFields = signal<BaseFormFieldComponent[]>([]);
 
   addInput(inputBuilder: BaseFormFieldComponent): void {
-    this.inputBuilders.update((inputs) => [...inputs, inputBuilder]);
+    this.formFields.update((inputs) => [...inputs, inputBuilder]);
   }
 
   /**
@@ -16,7 +16,7 @@ export class DynamicFormBuilderService {
    * @param formValue Form value
    */
   adjustInputs(formValue: any): void {
-    this.inputBuilders().forEach((builder) => {
+    this.formFields().forEach((builder) => {
       Object.entries(builder.inputConfig().expressions ?? {}).forEach(
         ([key, value]) => {
           if (key === 'hide') {
