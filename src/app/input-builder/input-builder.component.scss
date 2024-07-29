@@ -1,0 +1,11 @@
+.group-wrapper {
+  width: fit-content;
+  app-input-builder:not(:first-child) {
+    margin-left: 10px;
+  }
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+}

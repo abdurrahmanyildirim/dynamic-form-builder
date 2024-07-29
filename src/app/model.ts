@@ -1,5 +1,5 @@
-import { DestroyRef } from '@angular/core';
-import { AbstractControl } from '@angular/forms';
+import { Injector } from '@angular/core';
+import { AbstractControl, AsyncValidatorFn, ValidatorFn } from '@angular/forms';
 
 export type DynamicFormInput =
   | DynamicFormInputDefault
@@ -28,11 +28,17 @@ export interface DynamicFormInputBase<T = any> {
     disable?: (formValue: T) => boolean;
   };
   hooks?: {
-    onInit?: (f: AbstractControl, destroyRef: DestroyRef) => void;
-    afterViewInit?: (f: AbstractControl, destroyRef: DestroyRef) => void;
+    onInit?: (f: AbstractControl, injector: Injector) => void;
+    afterViewInit?: (f: AbstractControl, injector: Injector) => void;
     onDestroy?: (f: AbstractControl) => void;
   };
   children?: DynamicFormInput[];
+  /**
+   * Can be passed any angular validation.
+   */
+  validators?: ValidatorFn | ValidatorFn[];
+  asyncValidators?: AsyncValidatorFn | AsyncValidatorFn[];
+  class?: string[];
 }
 
 export type DynamicFormInputDefault = DynamicFormInputBase & {
@@ -57,3 +63,7 @@ export type DynamicFormInputTypes =
   | 'SELECT'
   | 'SLIDER'
   | 'DATE';
+
+export type FormErrors = {
+  [key: string]: Object;
+};

@@ -9,6 +9,11 @@ export class DynamicFormBuilderService {
     this.inputBuilders.update((inputs) => [...inputs, inputBuilder]);
   }
 
+  /**
+   * Adjust hide and disable inputs of component whenever form data change
+   *
+   * @param formValue Form value
+   */
   adjustInputs(formValue: any): void {
     this.inputBuilders().forEach((builder) => {
       Object.entries(builder.inputConfig().expressions ?? {}).forEach(

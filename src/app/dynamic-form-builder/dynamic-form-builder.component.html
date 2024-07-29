@@ -1,8 +1,8 @@
-@if (formReady()) {
-  <form [formGroup]="mainForm">
+@if (mainForm()) {
+  <form [formGroup]="mainForm()">
     @for (item of dynamicFormConfig(); track item.key) {
       <app-input-builder [inputConfig]="item" />
     }
   </form>
 }
-<pre>{{ mainForm.getRawValue() | json }}</pre>
+<pre>{{ mainForm().getRawValue() | json }}</pre>

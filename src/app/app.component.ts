@@ -1,15 +1,17 @@
 import { Component } from '@angular/core';
 import { DynamicFormBuilderComponent } from './dynamic-form-builder/dynamic-form-builder.component';
-import { DynamicFormInput } from './model';
+import { DynamicFormInput, FormErrors } from './model';
+import { Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [DynamicFormBuilderComponent],
   template: `
-    <app-reactive-dynamic-form-builder
+    <app-dynamic-form-builder
       [dynamicFormConfig]="config"
       [defaultValue]="defaultValue"
+      (errors)="onErrors($event)"
     />
   `,
 })
@@ -41,6 +43,7 @@ export class AppComponent {
           key: 'firstName',
           label: 'First Name',
           type: 'TEXT',
+          validators: [Validators.minLength(3), Validators.maxLength(10)],
         },
         {
           key: 'lastName',
@@ -50,6 +53,7 @@ export class AppComponent {
         {
           key: 'contact',
           fieldType: 'GROUP',
+          class: ['row'],
           children: [
             {
               key: 'no',
@@ -83,6 +87,7 @@ export class AppComponent {
       expressions: {
         disable: (value) => value.gender === 'female',
       },
+      validators: [Validators.min(10)],
     },
     {
       key: 'birthDate',
@@ -97,8 +102,8 @@ export class AppComponent {
   defaultValue = {
     gender: 'male',
     generalInfo: {
-      firstName: 'Apooo',
-      lastName: 'Yildirim',
+      firstName: 'Etalytics',
+      lastName: 'Eta Eta',
       contact: {
         no: '475869',
         city: {
@@ -109,4 +114,8 @@ export class AppComponent {
     },
     age: 29,
   };
+
+  onErrors(e: FormErrors): void {
+    console.log(e);
+  }
 }

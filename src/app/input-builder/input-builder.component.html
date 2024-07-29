@@ -1,7 +1,7 @@
 @if (!hide() && inputConfig(); as inp) {
   <!-- TODO: Handle array too. It is not handled yet -->
   @if (inp.fieldType === "GROUP") {
-    <div [formGroupName]="inp.key">
+    <div [formGroupName]="inp.key" [class]="inp.class" class="group-wrapper">
       @for (item of inp.children; track item.key) {
         <app-input-builder [inputConfig]="item" />
       }
