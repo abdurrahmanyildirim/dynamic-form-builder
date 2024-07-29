@@ -1,0 +1,8 @@
+@if (formReady()) {
+  <form [formGroup]="myForm">
+    @for (item of dynamicFormConfig(); track item.key) {
+      <app-input-builder [input]="item" [key]="item.key" />
+    }
+  </form>
+}
+<pre>{{ myForm.value | json }}</pre>

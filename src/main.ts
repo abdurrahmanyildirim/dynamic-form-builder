@@ -1,6 +1,19 @@
 import { bootstrapApplication } from '@angular/platform-browser';
-import { appConfig } from './app/app.config';
 import { AppComponent } from './app/app.component';
+import { provideZoneChangeDetection } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
-bootstrapApplication(AppComponent, appConfig)
-  .catch((err) => console.error(err));
+import { Routes } from '@angular/router';
+
+bootstrapApplication(
+  AppComponent,
+
+  {
+    providers: [
+      provideZoneChangeDetection({ eventCoalescing: true }),
+      provideRouter([]),
+      provideAnimationsAsync(),
+    ],
+  },
+).catch((err) => console.error(err));
