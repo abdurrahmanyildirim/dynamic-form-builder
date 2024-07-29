@@ -7,7 +7,7 @@ import {
   output,
   untracked,
 } from '@angular/core';
-import { DynamicFormInput, FormErrors } from '../model';
+import { DynamicFormInput } from '../model';
 import { JsonPipe } from '@angular/common';
 import { InputBuilderComponent } from '../input-builder/input-builder.component';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';

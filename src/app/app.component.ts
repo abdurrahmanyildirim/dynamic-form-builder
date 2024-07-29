@@ -3,6 +3,22 @@ import { DynamicFormBuilderComponent } from './dynamic-form-builder/dynamic-form
 import { DynamicFormInput, FormErrors } from './model';
 import { Validators } from '@angular/forms';
 
+type MyModel = {
+  gender: 'male' | 'female' | 'other';
+  generalInfo: {
+    firstName: string;
+    lastName: string;
+    contact: {
+      no: number;
+      city: {
+        cityName: string;
+        postCode: string;
+      };
+    };
+  };
+  age?: number;
+};
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -84,6 +100,7 @@ export class AppComponent {
       key: 'age',
       label: 'Age',
       type: 'SLIDER',
+      defaultValue: 10,
       expressions: {
         disable: (value) => value.gender === 'female',
       },
@@ -97,7 +114,7 @@ export class AppComponent {
         hide: (value) => value.gender === 'male',
       },
     },
-  ] satisfies DynamicFormInput[];
+  ] satisfies DynamicFormInput<MyModel>[];
 
   defaultValue = {
     gender: 'male',
@@ -105,15 +122,14 @@ export class AppComponent {
       firstName: 'Etalytics',
       lastName: 'Eta Eta',
       contact: {
-        no: '475869',
+        no: 475869,
         city: {
           cityName: 'Darmstadt',
           postCode: '64295',
         },
       },
     },
-    age: 29,
-  };
+  } satisfies MyModel;
 
   onErrors(e: FormErrors): void {
     console.log(e);
