@@ -28,6 +28,7 @@ export interface DynamicFormInputBase<T = any> {
   children?: DynamicFormInput[];
   /**
    * You can pass any Angular validation.
+   *
    * WARNING: The key must match the Angular validation keys. For example, when `maxLength` is used as a validator, the key should be 'maxlength'. Ensure this is accurate before using. Otherwise, the message will not match the validators created by Angular.
    */
   validators?: { message: string; key: string; validator: ValidatorFn }[];
