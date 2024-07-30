@@ -6,6 +6,7 @@ import { SelectFormFieldComponent } from '../form-fields/select/select-form-fiel
 import { DateFormFieldComponent } from '../form-fields/date/date-form-field.component';
 import { GeneralFormFieldComponent } from '../form-fields/general/general-form-field.component';
 import { DynamicFormField } from '../model';
+import { GroupFormFieldComponent } from '../form-fields/group/group-form-field.component';
 
 @Component({
   selector: 'app-field-builder',
@@ -14,6 +15,7 @@ import { DynamicFormField } from '../model';
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    GroupFormFieldComponent,
     GeneralFormFieldComponent,
     SliderFormFieldComponent,
     SelectFormFieldComponent,

@@ -6,7 +6,7 @@ export class DynamicFormBuilderService {
   formFields = signal<BaseFormFieldComponent[]>([]);
 
   addField(field: BaseFormFieldComponent): void {
-    this.formFields.update((inputs) => [...inputs, field]);
+    this.formFields.update((fields) => [...fields, field]);
   }
 
   /**

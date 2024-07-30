@@ -1,11 +1,7 @@
 @if (fieldConfig(); as inp) {
   <!-- TODO: Handle array too. It is not handled yet -->
   @if (inp.fieldType === "GROUP") {
-    <div [formGroupName]="inp.key" [class]="inp.class" class="group-wrapper">
-      @for (item of inp.children; track item.key) {
-        <app-field-builder [fieldConfig]="item" />
-      }
-    </div>
+    <app-group-form-field [fieldConfig]="fieldConfig()" />
   } @else {
     @if (fieldConfig().type === "TEXT" || fieldConfig().type === "NUMBER") {
       <app-general-form-field [fieldConfig]="fieldConfig()" />

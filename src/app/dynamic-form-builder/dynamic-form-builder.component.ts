@@ -77,24 +77,28 @@ export class DynamicFormBuilderComponent implements OnDestroy {
       )
       .subscribe((v) => {
         this.dynamicFormBuilderService.adjustFields(form.getRawValue());
-        const reactiveFormErrors = getReactiveFormErrors(form);
-        const errorMessageList = this.configErrorMessageList();
-        const errorsWithMessages = Object.entries(reactiveFormErrors).map(
-          ([path, value]) => {
-            const errorKey = Object.keys(value)[0];
-            const fieldKey = path.split('.').at(-1) ?? path;
-
-            return {
-              key: fieldKey,
-              path,
-              message:
-                errorMessageList[path].find((m) => m.key === errorKey)
-                  ?.message ?? 'Error',
-            } satisfies FormError;
-          },
-        );
-        this.errors.emit(errorsWithMessages);
+        this.emitMainFormErrors(form);
       });
+  }
+
+  private emitMainFormErrors(form: FormGroup): void {
+    const reactiveFormErrors = getReactiveFormErrors(form);
+    const errorMessageList = this.configErrorMessageList();
+    const errorsWithMessages = Object.entries(reactiveFormErrors).map(
+      ([path, value]) => {
+        const errorKey = Object.keys(value)[0];
+        const fieldKey = path.split('.').at(-1) ?? path;
+
+        return {
+          key: fieldKey,
+          path,
+          message:
+            errorMessageList[path]?.find((m) => m.key === errorKey)?.message ??
+            'Error',
+        } satisfies FormError;
+      },
+    );
+    this.errors.emit(errorsWithMessages);
   }
 
   ngOnDestroy(): void {
