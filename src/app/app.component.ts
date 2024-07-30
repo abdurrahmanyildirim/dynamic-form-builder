@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { DynamicFormBuilderComponent } from './dynamic-form-builder/dynamic-form-builder.component';
-import { DynamicFormInput } from './model';
+import { DynamicFormField } from './model';
 import { FormGroup, Validators } from '@angular/forms';
 import { JsonPipe } from '@angular/common';
 
@@ -161,7 +161,7 @@ export class AppComponent {
       type: 'DATE',
       hide: (value) => value.gender === 'male',
     },
-  ] satisfies DynamicFormInput<MyModel>[];
+  ] satisfies DynamicFormField<MyModel>[];
 
   defaultValue = {
     gender: 'male',

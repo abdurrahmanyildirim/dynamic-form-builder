@@ -9,7 +9,7 @@ import {
   isFormGroup,
 } from '@angular/forms';
 import {
-  DynamicFormInput,
+  DynamicFormField,
   FormConfigErrorMessages,
   ReactiveFormErrors,
 } from './model';
@@ -22,10 +22,9 @@ import { Optional, SkipSelf } from '@angular/core';
  * The errors are organized in a nested structure that reflects the hierarchy of the form controls,
  * allowing for easy access to specific validation issues.
  *
- * @param form The FormGroup from which to extract errors.
- * @returns An object containing validation errors for the form controls. The structure of the returned object
- *          reflects the structure of the form, with keys representing control names and values containing
- *          error details.
+ * @param form The FormGroup to check for errors.
+ * @param path The current path of the control in the form hierarchy.
+ * @returns A list of errors for the FormGroup and its controls.
  *
  * Example:
  * ```ts
@@ -46,52 +45,50 @@ import { Optional, SkipSelf } from '@angular/core';
  */
 export function getReactiveFormErrors(
   form: FormGroup,
-  path?: string,
+  path = '',
 ): ReactiveFormErrors {
-  let errors = {} as ReactiveFormErrors;
-  Object.entries(form.controls).forEach(([key, ct]) => {
-    if (ct.invalid) {
-      errors = getReactiveFormError(ct, errors, key, path);
-    }
+  const errors: ReactiveFormErrors = {};
+
+  // Iterate over each control in the FormGroup
+  Object.entries(form.controls).forEach(([key, control]) => {
+    const controlPath = path ? `${path}.${key}` : key;
+    Object.assign(errors, getReactiveFormError(control, controlPath));
   });
+
   return errors;
 }
 
 /**
  * Recursively retrieves validation errors for a given control and its children, if applicable.
  *
- * This function handles FormControl, FormGroup, and FormArray types:
- * - For FormControl, it directly adds the control's errors to the errorList.
- * - For FormGroup, it recursively collects errors from the group's controls.
- * - For FormArray, it collects errors from each control within the array.
- *
- * @param ct The AbstractControl (could be FormControl, FormGroup, or FormArray) to check for errors.
- * @param errorList The current error list object to which errors are added.
- * @param key The key representing the name or index of the control in the errorList.
- * @returns The updated error list containing errors for the provided control.
+ * @param control The AbstractControl (could be FormControl, FormGroup, or FormArray) to check for errors.
+ * @param path The path of the control in the form hierarchy.
+ * @returns An object containing errors for the provided control.
  */
 function getReactiveFormError(
-  ct: AbstractControl,
-  errorList: ReactiveFormErrors,
-  key: string,
-  path?: string,
+  control: AbstractControl,
+  path: string,
 ): ReactiveFormErrors {
-  const newPath = path ? path + '.' + key : key;
-  if (isFormControl(ct) && ct.errors) {
-    errorList[newPath] = ct.errors;
+  const errors: ReactiveFormErrors = {};
+
+  if (isFormControl(control) && control.errors) {
+    errors[path] = control.errors;
   }
-  if (isFormGroup(ct) && ct.invalid) {
-    errorList = { ...errorList, ...getReactiveFormErrors(ct, newPath) };
+
+  if (isFormGroup(control) && control.invalid) {
+    Object.assign(errors, getReactiveFormErrors(control, path));
   }
-  if (isFormArray(ct)) {
-    errorList = {
-      ...errorList,
-      ...ct.controls.map((c, i) =>
-        getReactiveFormError(c, {}, i + '', newPath),
-      ),
-    };
+
+  if (isFormArray(control)) {
+    control.controls.forEach((childControl, index) => {
+      Object.assign(
+        errors,
+        getReactiveFormError(childControl, `${path}[${index}]`),
+      );
+    });
   }
-  return errorList;
+
+  return errors;
 }
 
 /**
@@ -101,11 +98,11 @@ function getReactiveFormError(
  * item defines a form control. It handles different types of form controls, including nested form groups
  * and form arrays, by recursively creating controls based on the provided configuration.
  *
- * @param config An array of `DynamicFormInput` objects that define the configuration of the form controls.
+ * @param config An array of `DynamicFormField` objects that define the configuration of the form controls.
  * @returns A `FormGroup` object with controls and validators as specified in the configuration.
  *
  */
-export function createDynamicForm(config: DynamicFormInput[]): FormGroup {
+export function createDynamicForm(config: DynamicFormField[]): FormGroup {
   const fg = new FormGroup({});
 
   config?.forEach((c) => {
@@ -127,7 +124,7 @@ export function createDynamicForm(config: DynamicFormInput[]): FormGroup {
  * This function generates different types of controls depending on the `fieldType` specified in the configuration.
  * It supports creating nested FormGroups and FormArrays, though handling FormArrays is currently not fully implemented.
  *
- * @param c A `DynamicFormInput` object that defines the configuration of a control.
+ * @param c A `DynamicFormField` object that defines the configuration of a control.
  * @returns An `AbstractControl` object (either `FormControl`, `FormGroup`, or `FormArray`) based on the configuration.
  *
  * Notes:
@@ -135,7 +132,7 @@ export function createDynamicForm(config: DynamicFormInput[]): FormGroup {
  * - If `fieldType` is 'ARRAY', it creates a `FormArray`, but the handling of this type is yet to be implemented.
  * - If `fieldType` is not specified, a default `FormControl` is created.
  */
-function createControl(c: DynamicFormInput): AbstractControl {
+function createControl(c: DynamicFormField): AbstractControl {
   if (!c.fieldType) {
     return new FormControl(c.defaultValue);
   }
@@ -174,13 +171,13 @@ export const parentFormGroupProvider = [
 
 /**
  * Extracts error messages from a dynamic form configuration.
- * @param {DynamicFormInput[]} config - The dynamic form configuration array.
+ * @param {DynamicFormField[]} config - The dynamic form configuration array.
  * @param {FormConfigErrorMessages} [errorList={}] - The object to accumulate error messages.
  * @param {string} [path=''] - The current path within the form configuration.
  * @returns {FormConfigErrorMessages} The accumulated error messages.
  */
 export function extractErrorMessagesFromConfig(
-  config: DynamicFormInput[],
+  config: DynamicFormField[],
   errorList: FormConfigErrorMessages,
   path?: string,
 ): FormConfigErrorMessages {

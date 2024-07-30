@@ -14,7 +14,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 @Component({
   selector: 'app-date-form-field',
   template: `
-    @if (!hide() && inputConfig(); as inp) {
+    @if (!hide() && fieldConfig(); as inp) {
       @if (inp.type === 'DATE') {
         <mat-form-field>
           <mat-label> {{ inp.label ?? inp.key }} </mat-label>

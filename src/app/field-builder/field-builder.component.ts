@@ -5,7 +5,7 @@ import { parentFormGroupProvider } from '../util';
 import { SelectFormFieldComponent } from '../form-fields/select/select-form-field.component';
 import { DateFormFieldComponent } from '../form-fields/date/date-form-field.component';
 import { GeneralFormFieldComponent } from '../form-fields/general/general-form-field.component';
-import { DynamicFormInput } from '../model';
+import { DynamicFormField } from '../model';
 
 @Component({
   selector: 'app-field-builder',
@@ -22,5 +22,5 @@ import { DynamicFormInput } from '../model';
   viewProviders: [parentFormGroupProvider],
 })
 export class FieldBuilderComponent {
-  inputConfig = input.required<DynamicFormInput>();
+  fieldConfig = input.required<DynamicFormField>();
 }

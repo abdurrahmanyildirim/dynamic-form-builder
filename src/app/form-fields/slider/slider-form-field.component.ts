@@ -8,7 +8,7 @@ import { parentFormGroupProvider } from '../../util';
 @Component({
   selector: 'app-slider-form-field',
   template: `
-    @if (!hide() && inputConfig(); as inp) {
+    @if (!hide() && fieldConfig(); as inp) {
       @if (inp.type === 'SLIDER') {
         <div style="width: fit-content">
           <div style="display: flex; justify-content: space-between">

@@ -1,14 +1,14 @@
 import { Injector } from '@angular/core';
 import { AbstractControl, ValidatorFn } from '@angular/forms';
 
-export type DynamicFormInput<T = any> =
-  | DynamicFormInputDefault<T>
-  | DynamicFormInputSelect<T>
-  | DynamicFormInputSlider<T>;
+export type DynamicFormField<T = any> =
+  | DynamicFormFieldDefault<T>
+  | DynamicFormFieldSelect<T>
+  | DynamicFormFieldSlider<T>;
 
-export interface DynamicFormInputBase<T = any> {
+export interface DynamicFormFieldBase<T = any> {
   key: string;
-  type?: DynamicFormInputTypes;
+  type?: DynamicFormFieldTypes;
   fieldType?: 'GROUP' | 'ARRAY';
   label?: string;
   defaultValue?: any;
@@ -25,7 +25,7 @@ export interface DynamicFormInputBase<T = any> {
     afterViewInit?: (f: AbstractControl, injector: Injector) => void;
     onDestroy?: (f: AbstractControl) => void;
   };
-  children?: DynamicFormInput[];
+  children?: DynamicFormField[];
   /**
    * You can pass any Angular validation.
    *
@@ -39,23 +39,23 @@ export interface DynamicFormInputBase<T = any> {
   class?: string[];
 }
 
-export type DynamicFormInputDefault<T = any> = DynamicFormInputBase<T> & {
+export type DynamicFormFieldDefault<T = any> = DynamicFormFieldBase<T> & {
   type?: 'TEXT' | 'NUMBER' | 'DATE';
 };
 
-export type DynamicFormInputSelect<T = any> = DynamicFormInputBase<T> & {
+export type DynamicFormFieldSelect<T = any> = DynamicFormFieldBase<T> & {
   type: 'SELECT';
   options: { label: string; value: string | number | unknown }[];
 };
 
-export type DynamicFormInputSlider<T = any> = DynamicFormInputBase<T> & {
+export type DynamicFormFieldSlider<T = any> = DynamicFormFieldBase<T> & {
   type: 'SLIDER';
   min?: number;
   max?: number;
   step?: number;
 };
 
-export type DynamicFormInputTypes =
+export type DynamicFormFieldTypes =
   | 'TEXT'
   | 'NUMBER'
   | 'SELECT'

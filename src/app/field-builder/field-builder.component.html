@@ -1,24 +1,24 @@
-@if (inputConfig(); as inp) {
+@if (fieldConfig(); as inp) {
   <!-- TODO: Handle array too. It is not handled yet -->
   @if (inp.fieldType === "GROUP") {
     <div [formGroupName]="inp.key" [class]="inp.class" class="group-wrapper">
       @for (item of inp.children; track item.key) {
-        <app-field-builder [inputConfig]="item" />
+        <app-field-builder [fieldConfig]="item" />
       }
     </div>
   } @else {
-    @if (inputConfig().type === "TEXT" || inputConfig().type === "NUMBER") {
-      <app-general-form-field [inputConfig]="inputConfig()" />
+    @if (fieldConfig().type === "TEXT" || fieldConfig().type === "NUMBER") {
+      <app-general-form-field [fieldConfig]="fieldConfig()" />
     } @else {
       @switch (inp.type) {
         @case ("SLIDER") {
-          <app-slider-form-field [inputConfig]="inputConfig()" />
+          <app-slider-form-field [fieldConfig]="fieldConfig()" />
         }
         @case ("SELECT") {
-          <app-select-form-field [inputConfig]="inputConfig()" />
+          <app-select-form-field [fieldConfig]="fieldConfig()" />
         }
         @case ("DATE") {
-          <app-date-form-field [inputConfig]="inputConfig()" />
+          <app-date-form-field [fieldConfig]="fieldConfig()" />
         }
       }
     }

@@ -9,9 +9,9 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
-import { DynamicFormInput } from '../../model';
+import { DynamicFormField } from '../../model';
 import { ControlContainer, isFormGroup } from '@angular/forms';
-import { DynamicFormBuilderService } from '../../dynamic-form-builder/reactive-dynamic-form-builder.service';
+import { DynamicFormBuilderService } from '../../dynamic-form-builder/dynamic-form-builder.service';
 
 @Directive()
 export abstract class BaseFormFieldComponent
@@ -27,11 +27,11 @@ export abstract class BaseFormFieldComponent
    */
   hide = signal(false);
 
-  inputConfig = input.required<DynamicFormInput>();
+  fieldConfig = input.required<DynamicFormField>();
 
   // Form group/array/control of current input
   control = computed(() => {
-    const key = this.inputConfig().key;
+    const key = this.fieldConfig().key;
     if (isFormGroup(this.controlContainer.control)) {
       return this.controlContainer.control.controls[key];
     }
@@ -39,25 +39,25 @@ export abstract class BaseFormFieldComponent
   });
 
   ngOnInit(): void {
-    // Save all created inputs to service.
-    this.dynamicFormBuilderService.addInput(this);
+    // Save all created fields to service.
+    this.dynamicFormBuilderService.addField(this);
     const ct = this.control();
     if (ct) {
-      this.inputConfig().hooks?.onInit?.(ct, this.injector);
+      this.fieldConfig().hooks?.onInit?.(ct, this.injector);
     }
   }
 
   ngAfterViewInit(): void {
     const ct = this.control();
     if (ct) {
-      this.inputConfig().hooks?.afterViewInit?.(ct, this.injector);
+      this.fieldConfig().hooks?.afterViewInit?.(ct, this.injector);
     }
   }
 
   ngOnDestroy(): void {
     const ct = this.control();
     if (ct) {
-      this.inputConfig().hooks?.onDestroy?.(ct);
+      this.fieldConfig().hooks?.onDestroy?.(ct);
     }
   }
 }

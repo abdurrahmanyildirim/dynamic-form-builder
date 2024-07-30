@@ -5,30 +5,30 @@ import { BaseFormFieldComponent } from '../form-fields/base/base-form-field.comp
 export class DynamicFormBuilderService {
   formFields = signal<BaseFormFieldComponent[]>([]);
 
-  addInput(inputBuilder: BaseFormFieldComponent): void {
-    this.formFields.update((inputs) => [...inputs, inputBuilder]);
+  addField(field: BaseFormFieldComponent): void {
+    this.formFields.update((inputs) => [...inputs, field]);
   }
 
   /**
-   * Adjust hide and disable inputs of component whenever form data change
+   * Adjust hide and disable inputs of fields whenever form data change
    *
    * @param formValue Form value
    */
-  adjustInputs(formValue: any): void {
-    this.formFields().forEach((builder) => {
-      const hideExpression = builder.inputConfig().hide;
+  adjustFields(formValue: any): void {
+    this.formFields().forEach((field) => {
+      const hideExpression = field.fieldConfig().hide;
       if (hideExpression) {
         const hide = hideExpression(formValue);
-        builder.hide.set(hide);
+        field.hide.set(hide);
       }
-      const disableExpression = builder.inputConfig().disable;
+      const disableExpression = field.fieldConfig().disable;
       if (disableExpression) {
         const disable = disableExpression(formValue);
         if (disable) {
           // Use onlySelf to prevent main form value change trigger
-          builder.control()?.disable({ onlySelf: true });
+          field.control()?.disable({ onlySelf: true });
         } else {
-          builder.control()?.enable({ onlySelf: true });
+          field.control()?.enable({ onlySelf: true });
         }
       }
     });

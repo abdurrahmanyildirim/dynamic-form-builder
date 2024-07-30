@@ -8,7 +8,7 @@ import {
   untracked,
 } from '@angular/core';
 import {
-  DynamicFormInput,
+  DynamicFormField,
   FormError,
   FormConfigErrorMessages,
   FormErrors,
@@ -17,7 +17,7 @@ import {
 import { JsonPipe } from '@angular/common';
 import { FieldBuilderComponent } from '../field-builder/field-builder.component';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { DynamicFormBuilderService } from './reactive-dynamic-form-builder.service';
+import { DynamicFormBuilderService } from './dynamic-form-builder.service';
 import {
   debounceTime,
   distinctUntilChanged,
@@ -41,7 +41,7 @@ export class DynamicFormBuilderComponent implements OnDestroy {
   dynamicFormBuilderService = inject(DynamicFormBuilderService);
 
   // Inputs
-  dynamicFormConfig = input.required<DynamicFormInput[]>();
+  dynamicFormConfig = input.required<DynamicFormField[]>();
   defaultValue = input<any>();
 
   mainForm = computed<FormGroup>(() => {
@@ -76,7 +76,7 @@ export class DynamicFormBuilderComponent implements OnDestroy {
         distinctUntilChanged(),
       )
       .subscribe((v) => {
-        this.dynamicFormBuilderService.adjustInputs(form.getRawValue());
+        this.dynamicFormBuilderService.adjustFields(form.getRawValue());
         const reactiveFormErrors = getReactiveFormErrors(form);
         const errorMessageList = this.configErrorMessageList();
         const errorsWithMessages = Object.entries(reactiveFormErrors).map(

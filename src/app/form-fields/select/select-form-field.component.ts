@@ -9,7 +9,7 @@ import { MatSelect } from '@angular/material/select';
 @Component({
   selector: 'app-select-form-field',
   template: `
-    @if (!hide() && inputConfig(); as inp) {
+    @if (!hide() && fieldConfig(); as inp) {
       @if (inp.type === 'SELECT') {
         <mat-form-field>
           <mat-label> {{ inp.label ?? inp.key }} </mat-label>

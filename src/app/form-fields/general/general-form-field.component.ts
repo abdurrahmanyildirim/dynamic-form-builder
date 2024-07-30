@@ -7,7 +7,7 @@ import { parentFormGroupProvider } from '../../util';
 @Component({
   selector: 'app-general-form-field',
   template: `
-    @if (!hide() && inputConfig(); as inp) {
+    @if (!hide() && fieldConfig(); as inp) {
       <mat-form-field>
         <mat-label>{{ inp.label ?? inp.key }}</mat-label>
         <input
