@@ -1,5 +1,4 @@
 import { Injectable, signal } from '@angular/core';
-import { FieldBuilderComponent } from '../field-builder/field-builder.component';
 import { BaseFormFieldComponent } from '../base-form-field/base-form-field.component';
 
 @Injectable()
@@ -17,23 +16,21 @@ export class DynamicFormBuilderService {
    */
   adjustInputs(formValue: any): void {
     this.formFields().forEach((builder) => {
-      Object.entries(builder.inputConfig().expressions ?? {}).forEach(
-        ([key, value]) => {
-          if (key === 'hide') {
-            const hide = value(formValue);
-            builder.hide.set(hide);
-          }
-          if (key === 'disable') {
-            const disable = value(formValue);
-            if (disable) {
-              // Use onlySelf to prevent main form value change trigger
-              builder.control()?.disable({ onlySelf: true });
-            } else {
-              builder.control()?.enable({ onlySelf: true });
-            }
-          }
-        },
-      );
+      const hideExpression = builder.inputConfig().hide;
+      if (hideExpression) {
+        const hide = hideExpression(formValue);
+        builder.hide.set(hide);
+      }
+      const disableExpression = builder.inputConfig().disable;
+      if (disableExpression) {
+        const disable = disableExpression(formValue);
+        if (disable) {
+          // Use onlySelf to prevent main form value change trigger
+          builder.control()?.disable({ onlySelf: true });
+        } else {
+          builder.control()?.enable({ onlySelf: true });
+        }
+      }
     });
   }
 }

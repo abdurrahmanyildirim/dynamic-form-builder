@@ -8,7 +8,11 @@ import {
   isFormControl,
   isFormGroup,
 } from '@angular/forms';
-import { DynamicFormInput, ReactiveFormErrors } from './model';
+import {
+  DynamicFormInput,
+  FormConfigErrorMessages,
+  ReactiveFormErrors,
+} from './model';
 import { Optional, SkipSelf } from '@angular/core';
 
 /**
@@ -167,3 +171,44 @@ export const parentFormGroupProvider = [
     deps: [[new SkipSelf(), new Optional(), ControlContainer]],
   },
 ];
+
+/**
+ * Extracts error messages from a dynamic form configuration.
+ * @param {DynamicFormInput[]} config - The dynamic form configuration array.
+ * @param {FormConfigErrorMessages} [errorList={}] - The object to accumulate error messages.
+ * @param {string} [path=''] - The current path within the form configuration.
+ * @returns {FormConfigErrorMessages} The accumulated error messages.
+ */
+export function extractErrorMessagesFromConfig(
+  config: DynamicFormInput[],
+  errorList: FormConfigErrorMessages,
+  path?: string,
+): FormConfigErrorMessages {
+  config.forEach((field) => {
+    const currentPath = path ? `${path}.${field.key}` : field.key;
+    if (field.validators) {
+      if (!errorList[currentPath]) {
+        errorList[currentPath] = [];
+      }
+
+      field.validators.forEach((validator) => {
+        errorList[currentPath].push({
+          key: validator.key,
+          message: validator.message,
+        });
+      });
+    }
+
+    if (field.fieldType === 'GROUP' && field.children) {
+      extractErrorMessagesFromConfig(field.children, errorList, currentPath);
+    }
+    if (field.fieldType === 'ARRAY' && field.children) {
+      // TODO: Handle array field too. Not sure about that. Needs to be tested
+      // field.children.forEach((child, index) => {
+      //   const arrayPath = `${currentPath}[${index}]`;
+      //   extractErrorMessagesFromConfig([child], errorList, arrayPath);
+      // });
+    }
+  });
+  return errorList;
+}

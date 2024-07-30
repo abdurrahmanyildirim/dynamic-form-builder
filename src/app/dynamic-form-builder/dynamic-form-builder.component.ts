@@ -10,7 +10,7 @@ import {
 import {
   DynamicFormInput,
   FormError,
-  FormErrorMessages,
+  FormConfigErrorMessages,
   FormErrors,
   ReactiveFormErrors,
 } from '../model';
@@ -24,12 +24,16 @@ import {
   startWith,
   Subscription,
 } from 'rxjs';
-import { createDynamicForm, getReactiveFormErrors } from '../util';
+import {
+  createDynamicForm,
+  extractErrorMessagesFromConfig,
+  getReactiveFormErrors,
+} from '../util';
 
 @Component({
   selector: 'app-dynamic-form-builder',
   standalone: true,
-  imports: [FieldBuilderComponent, ReactiveFormsModule, JsonPipe],
+  imports: [FieldBuilderComponent, ReactiveFormsModule],
   providers: [DynamicFormBuilderService],
   templateUrl: './dynamic-form-builder.component.html',
 })
@@ -52,13 +56,12 @@ export class DynamicFormBuilderComponent implements OnDestroy {
     this.formInitialized.emit(form);
     return form;
   });
-  errorMessageList = computed<FormErrorMessages>(() => {
-    const config = this.dynamicFormConfig();
-    return this.extractErrorMessages(config, {});
-  });
+  configErrorMessageList = computed<FormConfigErrorMessages>(() =>
+    extractErrorMessagesFromConfig(this.dynamicFormConfig(), {}),
+  );
 
   formInitialized = output<FormGroup>();
-  errors = output<ReactiveFormErrors>();
+  errors = output<FormErrors>();
 
   valueChangeSub?: Subscription;
 
@@ -75,47 +78,23 @@ export class DynamicFormBuilderComponent implements OnDestroy {
       .subscribe((v) => {
         this.dynamicFormBuilderService.adjustInputs(form.getRawValue());
         const reactiveFormErrors = getReactiveFormErrors(form);
-        const errorMessageList = this.errorMessageList();
-        console.log(reactiveFormErrors);
-        console.log();
+        const errorMessageList = this.configErrorMessageList();
         const errorsWithMessages = Object.entries(reactiveFormErrors).map(
           ([path, value]) => {
-            const key = path.split('.').at(-1) ?? path;
+            const errorKey = Object.keys(value)[0];
+            const fieldKey = path.split('.').at(-1) ?? path;
+
             return {
-              key,
+              key: fieldKey,
               path,
-              message: errorMessageList[path].message,
+              message:
+                errorMessageList[path].find((m) => m.key === errorKey)
+                  ?.message ?? 'Error',
             } satisfies FormError;
           },
         );
-
-        // this.errors.emit(getReactiveFormErrors(form));
+        this.errors.emit(errorsWithMessages);
       });
-  }
-
-  extractErrorMessages(
-    config: DynamicFormInput[],
-    errorList: FormErrorMessages,
-    path?: string,
-  ): FormErrorMessages {
-    config.forEach((c) => {
-      const newPath = path ? path + '.' + c.key : c.key;
-      if (!c.fieldType && c.validators) {
-        c.validators.forEach((v) => {
-          errorList[newPath] = {
-            key: v.key,
-            message: v.message,
-          };
-        });
-      }
-      if (c.fieldType === 'GROUP' && c.children) {
-        errorList = {
-          ...errorList,
-          ...this.extractErrorMessages(c.children, errorList, newPath),
-        };
-      }
-    });
-    return errorList;
   }
 
   ngOnDestroy(): void {

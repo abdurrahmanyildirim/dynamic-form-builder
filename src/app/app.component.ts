@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { DynamicFormBuilderComponent } from './dynamic-form-builder/dynamic-form-builder.component';
-import { DynamicFormInput, ReactiveFormErrors } from './model';
-import { Validators } from '@angular/forms';
+import { DynamicFormInput } from './model';
+import { FormGroup, Validators } from '@angular/forms';
+import { JsonPipe } from '@angular/common';
 
 type MyModel = {
   gender: 'male' | 'female' | 'other';
@@ -22,16 +23,36 @@ type MyModel = {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [DynamicFormBuilderComponent],
+  imports: [DynamicFormBuilderComponent, JsonPipe],
   template: `
     <app-dynamic-form-builder
       [dynamicFormConfig]="config"
       [defaultValue]="defaultValue"
-      (errors)="onErrors($event)"
+      (errors)="formErrors.set($event)"
+      (formInitialized)="form.set($event)"
     />
+
+    <div style="display: flex;gap:100px">
+      <div>
+        <h2>Values</h2>
+        <pre
+          >{{ form()?.getRawValue() | json }}
+      </pre
+        >
+      </div>
+      <div>
+        <h2>Errors</h2>
+        <pre
+          >{{ formErrors() | json }}
+    </pre>
+      </div>
+    </div>
   `,
 })
 export class AppComponent {
+  formErrors = signal({});
+  form = signal<FormGroup | undefined>(undefined);
+
   config = [
     {
       key: 'gender',
@@ -68,12 +89,17 @@ export class AppComponent {
           validators: [
             {
               message: 'Last Name cant be lesser than 3',
-              key: 'minLength',
+              key: 'minlength',
               validator: Validators.minLength(3),
             },
             {
+              message: 'Last Name cant be lesser than 4',
+              key: 'minlength',
+              validator: Validators.minLength(4),
+            },
+            {
               message: 'Last Name cant be bigger than 10',
-              key: 'maxLength',
+              key: 'maxlength',
               validator: Validators.maxLength(10),
             },
           ],
@@ -120,10 +146,7 @@ export class AppComponent {
       label: 'Age',
       type: 'SLIDER',
       defaultValue: 10,
-      expressions: {
-        disable: (value) => value.gender === 'female',
-      },
-      // validators: [Validators.min(10)],
+      disable: (value) => value.gender === 'female',
       validators: [
         {
           message: 'Min age is 10',
@@ -136,9 +159,7 @@ export class AppComponent {
       key: 'birthDate',
       label: 'Birth Date',
       type: 'DATE',
-      expressions: {
-        hide: (value) => value.gender === 'male',
-      },
+      hide: (value) => value.gender === 'male',
     },
   ] satisfies DynamicFormInput<MyModel>[];
 
@@ -156,8 +177,4 @@ export class AppComponent {
       },
     },
   } satisfies MyModel;
-
-  onErrors(e: ReactiveFormErrors): void {
-    console.log(e);
-  }
 }

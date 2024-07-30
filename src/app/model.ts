@@ -23,10 +23,8 @@ export interface DynamicFormInputBase<T = any> {
    * }
    * ```
    */
-  expressions?: {
-    hide?: (formValue: T) => boolean;
-    disable?: (formValue: T) => boolean;
-  };
+  hide?: (formValue: T) => boolean;
+  disable?: (formValue: T) => boolean;
   hooks?: {
     onInit?: (f: AbstractControl, injector: Injector) => void;
     afterViewInit?: (f: AbstractControl, injector: Injector) => void;
@@ -67,21 +65,33 @@ export type DynamicFormInputTypes =
   | 'SLIDER'
   | 'DATE';
 
+/**
+ * Represents errors in reactive forms.
+ * The key is a path to the form control and the value is an object containing error details.
+ */
 export type ReactiveFormErrors = {
   [path: string]: Object;
 };
 
-export type FormErrorMessages = {
+/**
+ * Configuration for error messages.
+ * The key is a path to the form control and the value is an array of error messages associated with that path.
+ */
+export type FormConfigErrorMessages = {
   [path: string]: {
-    key: string;
-    message: string;
-  };
+    key: string; // Error key, e.g., "required", "minLength"
+    message: string; // Error message to be displayed
+  }[];
 };
 
+/**
+ * A collection of form errors combining reactive form errors and configuration error messages.
+ *
+ * When errors are caught from a reactive form, they are collected and matched with configuration error messages
+ * using their path and key. The resulting form errors are based on these matches.
+ */
 export type FormErrors = FormError[];
-
 export interface FormError {
-  // id?: UUID; // if id is provided for a field
   path: string; // like form.name.firstName or form.addresses[0].street
   key: string; // e.g. "required", "customValidatorKey"
   message: string; // "hey dude something is wrong at your form"
