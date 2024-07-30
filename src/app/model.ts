@@ -1,5 +1,5 @@
 import { Injector } from '@angular/core';
-import { AbstractControl, AsyncValidatorFn, ValidatorFn } from '@angular/forms';
+import { AbstractControl, ValidatorFn } from '@angular/forms';
 
 export type DynamicFormInput<T = any> =
   | DynamicFormInputDefault<T>
@@ -13,14 +13,9 @@ export interface DynamicFormInputBase<T = any> {
   label?: string;
   defaultValue?: any;
   /**
-   * Pass any reactive condition here.
-   * All expressions will be triggered whenever data change on main form.
-   *
    * @example
    * ```ts
-   * expressions:{
    *   hide:(value)=> value.gender === 'male'
-   * }
    * ```
    */
   hide?: (formValue: T) => boolean;

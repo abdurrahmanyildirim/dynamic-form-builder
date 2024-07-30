@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { BaseFormFieldComponent } from '../../base-form-field/base-form-field.component';
+import { BaseFormFieldComponent } from '../base/base-form-field.component';
 import {
   MatFormField,
   MatInput,

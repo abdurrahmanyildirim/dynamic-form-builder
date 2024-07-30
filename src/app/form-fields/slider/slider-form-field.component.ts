@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { BaseFormFieldComponent } from '../../base-form-field/base-form-field.component';
+import { BaseFormFieldComponent } from '../base/base-form-field.component';
 import { MatSlider, MatSliderThumb } from '@angular/material/slider';
 import { MatInput } from '@angular/material/input';
 import { ReactiveFormsModule } from '@angular/forms';

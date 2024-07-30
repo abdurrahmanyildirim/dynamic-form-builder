@@ -9,6 +9,13 @@ DynamicFormBuilder is a powerful tool that allows the creation of Angular reacti
 - **Highly Customizable**: Easily customize form fields, validations, and layout through JSON.
 - **Reactive Forms**: Benefit from the power of Angular's reactive forms for robust form management and validation.
 
+## Missing Parts
+
+- Form arrays and fields are not yet supported. Please test them before use and adjust the code as needed.
+- Async validations are not supported.
+- Error messages are not displayed under inputs. Implement a directive to automatically show messages under inputs.
+- Styles and placements are not well-defined.
+
 ## Example
 
 ![alt text](image.png)

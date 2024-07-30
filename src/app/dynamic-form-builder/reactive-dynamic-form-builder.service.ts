@@ -1,5 +1,5 @@
 import { Injectable, signal } from '@angular/core';
-import { BaseFormFieldComponent } from '../base-form-field/base-form-field.component';
+import { BaseFormFieldComponent } from '../form-fields/base/base-form-field.component';
 
 @Injectable()
 export class DynamicFormBuilderService {

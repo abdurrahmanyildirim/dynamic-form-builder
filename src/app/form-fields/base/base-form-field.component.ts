@@ -9,9 +9,9 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
-import { DynamicFormInput } from '../model';
+import { DynamicFormInput } from '../../model';
 import { ControlContainer, isFormGroup } from '@angular/forms';
-import { DynamicFormBuilderService } from '../dynamic-form-builder/reactive-dynamic-form-builder.service';
+import { DynamicFormBuilderService } from '../../dynamic-form-builder/reactive-dynamic-form-builder.service';
 
 @Directive()
 export abstract class BaseFormFieldComponent
