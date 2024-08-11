@@ -1,107 +1,68 @@
 import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
   Component,
-  computed,
+  DestroyRef,
+  effect,
   inject,
   input,
-  OnDestroy,
   output,
   untracked,
 } from '@angular/core';
-import {
-  DynamicFormField,
-  FormError,
-  FormConfigErrorMessages,
-  FormErrors,
-  ReactiveFormErrors,
-} from '../model';
-import { JsonPipe } from '@angular/common';
-import { FieldBuilderComponent } from '../field-builder/field-builder.component';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { DynamicFormBuilderService } from './dynamic-form-builder.service';
-import {
-  debounceTime,
-  distinctUntilChanged,
-  startWith,
-  Subscription,
-} from 'rxjs';
-import {
-  createDynamicForm,
-  extractErrorMessagesFromConfig,
-  getReactiveFormErrors,
-} from '../util';
+import type { DynamicFormField, FormErrors } from './model';
+import { FieldBuilderComponent } from './field-builder/field-builder.component';
+import { DynamicFormBuilderService } from './services/dynamic-form-builder.service';
+import { debounceTime } from 'rxjs';
 
 @Component({
   selector: 'app-dynamic-form-builder',
   standalone: true,
-  imports: [FieldBuilderComponent, ReactiveFormsModule],
+  imports: [ReactiveFormsModule, FieldBuilderComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [DynamicFormBuilderService],
-  templateUrl: './dynamic-form-builder.component.html',
+  template: `
+    <form [formGroup]="form()" style="width: min-content;">
+      @for (config of formConfig(); track config.key || $index) {
+        <app-field-builder [config]="config" [dir]="''" />
+      }
+    </form>
+  `,
 })
-export class DynamicFormBuilderComponent implements OnDestroy {
-  dynamicFormBuilderService = inject(DynamicFormBuilderService);
+export class DynamicFormBuilderComponentReactive implements AfterViewInit {
+  form = input.required<FormGroup>();
+  formConfig = input.required<DynamicFormField[]>();
 
-  // Inputs
-  dynamicFormConfig = input.required<DynamicFormField[]>();
-  defaultValue = input<any>();
-
-  mainForm = computed<FormGroup>(() => {
-    const config = this.dynamicFormConfig();
-    const form = createDynamicForm(config);
+  defaultValue = input<any>({});
+  DefaultValueEffect = effect(() => {
+    const defaultValue = this.defaultValue();
     untracked(() => {
-      // Clean inputs from service.
-      this.dynamicFormBuilderService.formFields.set([]);
+      this.form().patchValue(defaultValue);
     });
-    this.listenFormChanges(form);
-    form.patchValue(this.defaultValue());
-    this.formInitialized.emit(form);
-    return form;
   });
-  configErrorMessageList = computed<FormConfigErrorMessages>(() =>
-    extractErrorMessagesFromConfig(this.dynamicFormConfig(), {}),
-  );
 
-  formInitialized = output<FormGroup>();
+  dynamicFormBuilderService = inject(DynamicFormBuilderService);
+  destroyRef = inject(DestroyRef);
+
+  /**
+   * Extracted errors from form with our own error format.
+   */
   errors = output<FormErrors>();
-
-  valueChangeSub?: Subscription;
-
-  listenFormChanges(form: FormGroup): void {
-    // Unsubscribe previous value change.
-    this.valueChangeSub?.unsubscribe();
-    this.valueChangeSub = form.valueChanges
-      .pipe(
-        startWith(this.defaultValue()),
-        // Make sure UI fully initialized and improve the performance
-        debounceTime(50),
-        distinctUntilChanged(),
-      )
-      .subscribe((v) => {
-        this.dynamicFormBuilderService.adjustFields(form.getRawValue());
-        this.emitMainFormErrors(form);
+  FormErrorsEffect = effect(() => {
+    const errors = this.dynamicFormBuilderService.errors();
+    if (errors) {
+      untracked(() => {
+        this.errors.emit(errors);
       });
-  }
+    }
+  });
 
-  private emitMainFormErrors(form: FormGroup): void {
-    const reactiveFormErrors = getReactiveFormErrors(form);
-    const errorMessageList = this.configErrorMessageList();
-    const errorsWithMessages = Object.entries(reactiveFormErrors).map(
-      ([path, value]) => {
-        const errorKey = Object.keys(value)[0];
-        const fieldKey = path.split('.').at(-1) ?? path;
-
-        return {
-          key: fieldKey,
-          path,
-          message:
-            errorMessageList[path]?.find((m) => m.key === errorKey)?.message ??
-            'Error',
-        } satisfies FormError;
-      },
-    );
-    this.errors.emit(errorsWithMessages);
-  }
-
-  ngOnDestroy(): void {
-    this.valueChangeSub?.unsubscribe();
+  ngAfterViewInit(): void {
+    this.form()
+      .valueChanges.pipe(takeUntilDestroyed(this.destroyRef), debounceTime(10))
+      .subscribe((v) => {
+        this.dynamicFormBuilderService.formValue.set(v);
+      });
   }
 }

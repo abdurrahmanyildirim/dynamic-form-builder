@@ -1,0 +1,35 @@
+// @use '@angular/material' as mat;
+// @use 'var';
+
+.error-color {
+  // color: var.$error-color;
+  color: red;
+}
+
+.wrapper-container {
+  position: relative;
+  width: min-content;
+}
+
+.error-indicator {
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 1;
+  line-height: 0;
+}
+
+.disable {
+  position: relative;
+  opacity: 0.5;
+
+  &:after {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 100%;
+    height: 140%;
+    content: " ";
+  }
+}

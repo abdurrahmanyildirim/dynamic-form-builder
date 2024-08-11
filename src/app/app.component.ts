@@ -1,180 +1,140 @@
 import { Component, signal } from '@angular/core';
-import { DynamicFormBuilderComponent } from './dynamic-form-builder/dynamic-form-builder.component';
-import { DynamicFormField } from './model';
-import { FormGroup, Validators } from '@angular/forms';
+import { FormGroup, NgForm, Validators } from '@angular/forms';
+import { DynamicFormField, FormErrors } from './dynamic-form-builder/model';
+import { DynamicFormBuilderComponentReactive } from './dynamic-form-builder/dynamic-form-builder.component';
 import { JsonPipe } from '@angular/common';
-
-type MyModel = {
-  gender: 'male' | 'female' | 'other';
-  generalInfo: {
-    firstName: string;
-    lastName: string;
-    contact: {
-      no: number;
-      city: {
-        cityName: string;
-        postCode: string;
-      };
-    };
-  };
-  age?: number;
-};
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [DynamicFormBuilderComponent, JsonPipe],
+  imports: [DynamicFormBuilderComponentReactive, JsonPipe],
   template: `
-    <app-dynamic-form-builder
-      [dynamicFormConfig]="config"
-      [defaultValue]="defaultValue"
-      (errors)="formErrors.set($event)"
-      (formInitialized)="form.set($event)"
-    />
+    <div style="padding:20px">
+      <app-dynamic-form-builder
+        [form]="form"
+        [formConfig]="configs"
+        [defaultValue]="defaultValue"
+        (errors)="errors.set($event)"
+      />
+      <div style="display: flex;gap:10px">
+        <div>
+          <h3>Values</h3>
+          <pre>{{ values() | json }}</pre>
+        </div>
 
-    <div style="display: flex;gap:100px">
-      <div>
-        <h2>Values</h2>
-        <pre
-          >{{ form()?.getRawValue() | json }}
-      </pre
-        >
-      </div>
-      <div>
-        <h2>Errors</h2>
-        <pre
-          >{{ formErrors() | json }}
-    </pre>
+        <div>
+          <h3>Errors</h3>
+          <pre>{{ errors() | json }}</pre>
+        </div>
       </div>
     </div>
   `,
 })
 export class AppComponent {
-  formErrors = signal({});
-  form = signal<FormGroup | undefined>(undefined);
+  form = new FormGroup({});
+  errors = signal<FormErrors>([]);
 
-  config = [
-    {
-      key: 'gender',
-      type: 'SELECT',
-      options: [
-        {
-          label: 'Male',
-          value: 'male',
-        },
-        {
-          label: 'Female',
-          value: 'female',
-        },
-        {
-          label: 'Other',
-          value: 'other',
-        },
-      ],
-    },
-    {
-      key: 'generalInfo',
-      fieldType: 'GROUP',
-      children: [
-        {
-          key: 'firstName',
-          label: 'First Name',
-          type: 'TEXT',
-          // validators: [Validators.minLength(3), Validators.maxLength(10)],
-        },
-        {
-          key: 'lastName',
-          label: 'Last Name',
-          type: 'TEXT',
-          validators: [
-            {
-              message: 'Last Name cant be lesser than 3',
-              key: 'minlength',
-              validator: Validators.minLength(3),
-            },
-            {
-              message: 'Last Name cant be lesser than 4',
-              key: 'minlength',
-              validator: Validators.minLength(4),
-            },
-            {
-              message: 'Last Name cant be bigger than 10',
-              key: 'maxlength',
-              validator: Validators.maxLength(10),
-            },
-          ],
-        },
-        {
-          key: 'contact',
-          fieldType: 'GROUP',
-          class: ['row'],
-          children: [
-            {
-              key: 'no',
-              label: 'No',
-              type: 'NUMBER',
-            },
-            {
-              key: 'city',
-              fieldType: 'GROUP',
-              children: [
-                {
-                  key: 'cityName',
-                  label: 'City Name',
-                  type: 'TEXT',
-                },
-                {
-                  key: 'postCode',
-                  label: 'Post Code',
-                  type: 'NUMBER',
-                  validators: [
-                    {
-                      message: 'Post code is required',
-                      key: 'required',
-                      validator: Validators.required,
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-    {
-      key: 'age',
-      label: 'Age',
-      type: 'SLIDER',
-      defaultValue: 10,
-      disable: (value) => value.gender === 'female',
-      validators: [
-        {
-          message: 'Min age is 10',
-          key: 'min',
-          validator: Validators.min(10),
-        },
-      ],
-    },
-    {
-      key: 'birthDate',
-      label: 'Birth Date',
-      type: 'DATE',
-      hide: (value) => value.gender === 'male',
-    },
-  ] satisfies DynamicFormField<MyModel>[];
+  values = toSignal(this.form.valueChanges);
 
   defaultValue = {
-    gender: 'male',
-    generalInfo: {
-      firstName: 'Etalytics',
-      lastName: 'Eta Eta',
-      contact: {
-        no: 475869,
-        city: {
-          cityName: 'Darmstadt',
-          postCode: '64295',
+    name: 'Etalytics',
+    car: 'mercedes',
+    email: 'eta@etalytics.com',
+    phones: {
+      home: '1234',
+    },
+  };
+
+  configs = [
+    {
+      type: 'text',
+      key: 'name',
+      label: 'Name',
+      resetOnHide: true,
+      validators: {
+        required: {
+          message: 'Name is required',
+          validator: Validators.required,
+        },
+        minlength: {
+          message: 'Name must be min 3 characters',
+          validator: Validators.minLength(3),
         },
       },
+
+      hide: (f) => f.getValueByKey('car') === 'bmw',
     },
-  } satisfies MyModel;
+    {
+      type: 'email',
+      key: 'email',
+      label: 'Email',
+      hide: (f) => f.getValueByKey('car') === undefined,
+    },
+    {
+      type: 'select',
+      key: 'car',
+      options: [
+        {
+          label: 'Mercedes',
+          value: 'mercedes',
+        },
+        {
+          label: 'Audi',
+          value: 'audi',
+        },
+        {
+          label: 'BMW',
+          value: 'bmw',
+        },
+      ],
+    },
+    {
+      key: 'phones',
+      hide: (f) => f.getValueByKey('car') === 'audi',
+      children: [
+        {
+          type: 'text',
+          key: 'home',
+          label: 'Home',
+        },
+        {
+          type: 'text',
+          key: 'mobile',
+          label: 'Mobile',
+          validators: {
+            maxlength: {
+              message: 'Mobile Phone max length is 5',
+              validator: Validators.maxLength(4),
+            },
+          },
+        },
+      ],
+    },
+    {
+      props: {
+        myCustomProp: 'Custom Prop',
+      },
+      class: ['row'],
+      children: [
+        {
+          type: 'text',
+          key: 'homeAddress',
+          label: 'Home Address',
+          validators: {
+            maxlength: {
+              message: 'Home Address max length is 5',
+              validator: Validators.maxLength(4),
+            },
+          },
+        },
+        {
+          type: 'text',
+          key: 'companyAddress',
+          label: 'Company Address',
+          disable: (f) => f.getValueByKey('car') === 'bmw',
+        },
+      ],
+    },
+  ] satisfies DynamicFormField[];
 }

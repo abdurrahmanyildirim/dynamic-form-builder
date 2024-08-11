@@ -1,7 +1,0 @@
-@if (mainForm()) {
-  <form [formGroup]="mainForm()">
-    @for (item of dynamicFormConfig(); track item.key) {
-      <app-field-builder [fieldConfig]="item" />
-    }
-  </form>
-}
