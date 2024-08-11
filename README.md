@@ -13,8 +13,6 @@ DynamicFormBuilder is a powerful tool that allows the creation of Angular reacti
 
 - Form arrays and fields are not yet supported. Please test them before use and adjust the code as needed.
 - Async validations are not supported.
-- Error messages are not displayed under inputs. Implement a directive to automatically show messages under inputs.
-- Styles and placements are not well-defined.
 
 ## Example
 
