@@ -1,7 +1,5 @@
-import type { AfterViewInit, Signal } from '@angular/core';
+import type { AfterViewInit, Type } from '@angular/core';
 import { Directive, inject, input, ViewContainerRef } from '@angular/core';
-import type { DynamicFormFieldCustom } from '../model';
-import { FieldWrapperComponent } from '../field-builder/field-wrapper/field-wrapper.component';
 
 /**
  * @description
@@ -14,17 +12,14 @@ import { FieldWrapperComponent } from '../field-builder/field-wrapper/field-wrap
   standalone: true,
 })
 export class CustomFieldBuilderDirective implements AfterViewInit {
-  fieldWrapper = inject(FieldWrapperComponent);
-  config = this.fieldWrapper.config as Signal<DynamicFormFieldCustom>;
+  type = input.required<Type<unknown>>();
   private viewContainerRef = inject(ViewContainerRef);
 
   ngAfterViewInit(): void {
-    const config = this.config();
-    if (!config) return;
     // Clear any existing components in the view container
     this.viewContainerRef.clear();
 
     // Dynamically create the component specified in the configuration
-    this.viewContainerRef.createComponent(config.type);
+    this.viewContainerRef.createComponent(this.type());
   }
 }

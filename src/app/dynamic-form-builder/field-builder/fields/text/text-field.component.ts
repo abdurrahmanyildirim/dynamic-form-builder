@@ -17,22 +17,21 @@ import { BaseFieldComponent } from '../base/base-field.component';
   imports: [MatFormField, MatLabel, MatInput, MatError, ReactiveFormsModule],
   viewProviders: [parentFormGroupProvider],
   template: `
-    @if (config(); as c) {
-      <mat-form-field>
-        <mat-label>{{ c.label ?? c.key }}</mat-label>
-        <input
-          matInput
-          [type]="c.type"
-          [formControlName]="c.key"
-          [placeholder]="c.placeholder ?? ''"
-        />
-        <mat-error>
-          @if (errorMessage()) {
-            {{ errorMessage() }}
-          }
-        </mat-error>
-      </mat-form-field>
-    }
+    @let c = config();
+    <mat-form-field>
+      <mat-label>{{ c.label ?? c.key }}</mat-label>
+      <input
+        matInput
+        [type]="c.type"
+        [formControlName]="c.key"
+        [placeholder]="placeholder()"
+      />
+      <mat-error>
+        @if (errorMessage()) {
+          {{ errorMessage() }}
+        }
+      </mat-error>
+    </mat-form-field>
   `,
 })
 export class TextFieldComponent extends BaseFieldComponent<DynamicFormFieldText> {}

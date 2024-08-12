@@ -27,6 +27,7 @@ import {
   FormControl,
   FormGroup,
 } from '@angular/forms';
+import { outputFromObservable, toObservable } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'eta-field-wrapper',
@@ -48,13 +49,15 @@ import {
     </div>
   `,
 })
-export class FieldWrapperComponent implements OnInit, Field {
+export class FieldWrapperComponent<T extends DynamicFormField>
+  implements OnInit, Field
+{
   injector = inject(Injector);
   destroyRef = inject(DestroyRef);
   dynamicFormBuilderService = inject(DynamicFormBuilderService);
   controlContainer = inject(ControlContainer);
 
-  config = input.required<DynamicFormField>();
+  config = input.required<T>();
   dir = input.required<string>();
   path = computed<string | undefined>(() => {
     const key = this.config().key;
@@ -72,14 +75,9 @@ export class FieldWrapperComponent implements OnInit, Field {
    * Those variables will be set in dynamic form builder service when data change
    */
   disable = signal(false);
+  placeholder = signal<string>('');
   hide = signal(false);
-  hideChange = output<boolean>();
-  hideEffect = effect(() => {
-    const hide = this.hide();
-    untracked(() => {
-      // this.hideChange.emit(hide);
-    });
-  });
+  hideChange = outputFromObservable(toObservable(this.hide));
 
   /**
    * Props will be created as signal at onInit and will be set whenever data change.
@@ -133,8 +131,8 @@ export class FieldWrapperComponent implements OnInit, Field {
   }
 
   ngOnInit(): void {
-    this.setProps();
-    const { key, defaultValue, validators, children } = this.config();
+    const { key, defaultValue, validators, children, props } = this.config();
+    this.setProps(props);
     if (key) {
       let control = undefined;
       if (children && children.length > 0) {
@@ -156,8 +154,7 @@ export class FieldWrapperComponent implements OnInit, Field {
   /**
    * Create signal variables for passed props.
    */
-  private setProps(): void {
-    const props = this.config().props;
+  private setProps(props: DynamicFormField['props']): void {
     if (props) {
       Object.entries(props).forEach(([key, value]) => {
         value = typeof value === 'function' ? value(this) : value;

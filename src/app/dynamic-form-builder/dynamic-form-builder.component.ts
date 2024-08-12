@@ -9,7 +9,11 @@ import {
   output,
   untracked,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {
+  outputFromObservable,
+  takeUntilDestroyed,
+  toObservable,
+} from '@angular/core/rxjs-interop';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import type { DynamicFormField, FormErrors } from './model';
 import { FieldBuilderComponent } from './field-builder/field-builder.component';
@@ -48,15 +52,9 @@ export class DynamicFormBuilderComponentReactive implements AfterViewInit {
   /**
    * Extracted errors from form with our own error format.
    */
-  errors = output<FormErrors>();
-  FormErrorsEffect = effect(() => {
-    const errors = this.dynamicFormBuilderService.errors();
-    if (errors) {
-      untracked(() => {
-        this.errors.emit(errors);
-      });
-    }
-  });
+  errors = outputFromObservable(
+    toObservable(this.dynamicFormBuilderService.errors),
+  );
 
   ngAfterViewInit(): void {
     this.form()

@@ -72,6 +72,12 @@ export class AppComponent {
       hide: (f) => f.getValueByKey('car') === undefined,
     },
     {
+      type: 'text',
+      key: 'carPlaceHolder',
+      label: ' Car placeHolder',
+      placeholder: (f) => f.getValueByKey<string>('car') ?? '',
+    },
+    {
       type: 'select',
       key: 'car',
       options: [

@@ -27,21 +27,20 @@ import { BaseFieldComponent } from '../base/base-field.component';
   ],
 
   template: `
-    @if (config(); as c) {
-      <mat-form-field>
-        <mat-label> {{ c.label ?? c.key }} </mat-label>
-        <mat-select [id]="c.key" [formControlName]="c.key">
-          @for (item of c.options; track item.value) {
-            <mat-option [value]="item.value">{{ item.label }} </mat-option>
-          }
-        </mat-select>
-        <mat-error>
-          @if (errorMessage()) {
-            {{ errorMessage() }}
-          }
-        </mat-error>
-      </mat-form-field>
-    }
+    @let c = config();
+    <mat-form-field>
+      <mat-label> {{ c.label ?? c.key }} </mat-label>
+      <mat-select [id]="c.key" [formControlName]="c.key">
+        @for (item of c.options; track item.value) {
+          <mat-option [value]="item.value">{{ item.label }} </mat-option>
+        }
+      </mat-select>
+      <mat-error>
+        @if (errorMessage()) {
+          {{ errorMessage() }}
+        }
+      </mat-error>
+    </mat-form-field>
   `,
 })
 export class SelectFieldComponent extends BaseFieldComponent<DynamicFormFieldSelect> {}

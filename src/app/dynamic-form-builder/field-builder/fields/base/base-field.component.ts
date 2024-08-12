@@ -1,4 +1,11 @@
-import type { AfterViewInit, OnDestroy, OnInit, Signal } from '@angular/core';
+import type {
+  AfterViewInit,
+  InputSignal,
+  OnDestroy,
+  OnInit,
+  Signal,
+  WritableSignal,
+} from '@angular/core';
 import { Directive, inject } from '@angular/core';
 import type { DynamicFormField } from '../../../model';
 import { FieldWrapperComponent } from '../../field-wrapper/field-wrapper.component';
@@ -9,13 +16,11 @@ import { FieldWrapperComponent } from '../../field-wrapper/field-wrapper.compone
  *               This allows customization of the form field configuration type.
  */
 @Directive()
-export abstract class BaseFieldComponent<
-    T extends DynamicFormField = DynamicFormField,
-  >
+export abstract class BaseFieldComponent<T extends DynamicFormField>
   implements OnInit, AfterViewInit, OnDestroy
 {
-  fieldWrapper = inject(FieldWrapperComponent);
-  config = this.fieldWrapper.config as unknown as Signal<T>;
+  fieldWrapper = inject(FieldWrapperComponent<T>);
+  config = this.fieldWrapper.config;
 
   ngOnInit(): void {
     this.fieldWrapper.control()?.enable();
@@ -27,6 +32,7 @@ export abstract class BaseFieldComponent<
    * We can send some conditional data to our fields.
    */
   props = this.fieldWrapper.props;
+  placeholder = this.fieldWrapper.placeholder;
   errorMessage = this.fieldWrapper.errorMessage;
 
   ngAfterViewInit(): void {

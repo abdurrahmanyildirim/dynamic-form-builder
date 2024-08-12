@@ -5,6 +5,7 @@ import {
   effect,
   input,
   signal,
+  Type,
 } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import type { DynamicFormField } from '../model';
@@ -48,7 +49,9 @@ import { parentFormGroupProvider } from '../util';
     >
       <span [style.display]="hide() ? 'none' : ''">
         @if (!hide()) {
-          @if (hasChildren()) {
+          @if (customFieldType(); as cType) {
+            <ng-container appCustomFieldBuilder [type]="cType" />
+          } @else if (hasChildren()) {
             <div class="container" [class]="c.class">
               @if (c.key) {
                 <ng-container [formGroupName]="c.key">
@@ -65,11 +68,8 @@ import { parentFormGroupProvider } from '../util';
                 }
               }
             </div>
-            <!-- <app-group-form-field /> -->
           } @else if (isTextField()) {
             <eta-text-field />
-          } @else if (isCustomField()) {
-            <ng-container etaCustomFieldBuilder />
           } @else if (c.type === 'select') {
             <eta-select-form-field />
           }
@@ -95,10 +95,10 @@ export class FieldBuilderComponent {
    */
   hide = signal(false);
 
-  isCustomField = computed<boolean>(() => {
+  customFieldType = computed<Type<unknown> | undefined>(() => {
     const type = this.config()?.type;
-    if (!type) return false;
-    return typeof type !== 'string';
+    if (!type || typeof type === 'string') return;
+    return type;
   });
 
   isTextField = computed<boolean>(() => {

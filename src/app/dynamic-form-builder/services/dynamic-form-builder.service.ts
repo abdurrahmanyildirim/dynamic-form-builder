@@ -3,10 +3,10 @@ import type { DynamicFormField, FormErrors } from '../model';
 import type { FieldWrapperComponent } from '../field-builder/field-wrapper/field-wrapper.component';
 
 @Injectable()
-export class DynamicFormBuilderService {
+export class DynamicFormBuilderService<T extends DynamicFormField> {
   formValue = signal<unknown | undefined>(undefined);
   errors = signal<FormErrors>([]);
-  fields = signal<FieldWrapperComponent[]>([]);
+  fields = signal<FieldWrapperComponent<T>[]>([]);
 
   FormValueEffect = effect(() => {
     const formValue = this.formValue();
@@ -17,36 +17,40 @@ export class DynamicFormBuilderService {
     }
   });
 
-  addField(field: FieldWrapperComponent): void {
+  addField(field: FieldWrapperComponent<T>): void {
     this.fields.update((fields) => [...fields, field]);
   }
 
-  removeField(field: FieldWrapperComponent): void {
+  removeField(field: FieldWrapperComponent<T>): void {
     this.fields.update((fields) => fields.filter((f) => f !== field));
   }
 
   private adjustFieldVariables(formValue?: unknown): void {
     if (!formValue) return;
-    let allFormErrors: FormErrors = [];
+    let errors: FormErrors = [];
     this.fields().forEach((field) => {
       const config = field.config();
       this.adjustHide(field, config);
       this.adjustDisable(field, config);
       this.adjustProps(field, config);
-      const errors = field.extractErrors();
-      allFormErrors = [...allFormErrors, ...errors];
+      this.adjustPlaceHolder(field, config);
+      const fieldErrors = field.extractErrors();
+      errors = [...errors, ...fieldErrors];
     });
-    this.errors.set(allFormErrors);
+    this.errors.set(errors);
   }
 
-  private adjustHide(f: FieldWrapperComponent, c: DynamicFormField): void {
+  private adjustHide(f: FieldWrapperComponent<T>, c: DynamicFormField): void {
     const hideExpression = c?.hide;
     if (!hideExpression) return;
     const isHidden = hideExpression(f);
     f.hide.set(isHidden);
   }
 
-  private adjustDisable(f: FieldWrapperComponent, c: DynamicFormField): void {
+  private adjustDisable(
+    f: FieldWrapperComponent<T>,
+    c: DynamicFormField,
+  ): void {
     const disableExpression = c?.disable;
     if (!disableExpression) return;
     f.disable.set(disableExpression(f));
@@ -59,7 +63,7 @@ export class DynamicFormBuilderService {
    * @param field
    * @param formValue
    */
-  private adjustProps(f: FieldWrapperComponent, c: DynamicFormField): void {
+  private adjustProps(f: FieldWrapperComponent<T>, c: DynamicFormField): void {
     const props = c.props;
     if (props) {
       Object.entries(props ?? {}).forEach(([key, value]) => {
@@ -68,5 +72,14 @@ export class DynamicFormBuilderService {
         }
       });
     }
+  }
+
+  private adjustPlaceHolder(
+    f: FieldWrapperComponent<T>,
+    c: DynamicFormField,
+  ): void {
+    const placeholder = c.placeholder;
+    if (!placeholder) return;
+    f.placeholder.set(placeholder(f));
   }
 }

@@ -22,11 +22,15 @@ export type DynamicFormFieldTypes =
   | Type<unknown>;
 
 export type DynamicFormFieldDefault = {
+  /**
+   * key can be undefined.
+   * In certain scenarios, you may want to group form controls together in the UI without reflecting this grouping in the underlying data structure.
+   */
   key?: string;
   type?: DynamicFormFieldTypes;
   defaultValue?: any;
   label?: string;
-  placeholder?: string;
+  placeholder?: (field: Field) => string;
   hide?: (field: Field) => boolean;
   disable?: (field: Field) => boolean;
   resetOnHide?: boolean;
@@ -58,6 +62,14 @@ export type DynamicFormFieldDefault = {
    * Style Classes for the field
    */
   class?: string[];
+  /**
+   * Defines the child fields of this form group.
+   *
+   * Use `children` when you want to create a nested form group. This allows for grouping multiple form fields together under a single parent field.
+   * If the `children` property is defined, this field will be treated as a `formGroup`, meaning it can contain other fields, allowing for hierarchical form structures.
+   *
+   * If there is not provided key, children will be group on UI only. Data structure will be flat.
+   */
   children?: DynamicFormField[];
 };
 
