@@ -11,7 +11,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
   imports: [DynamicFormBuilderComponentReactive, JsonPipe],
   template: `
     <div style="padding:20px">
-      <app-dynamic-form-builder
+      <eta-dynamic-form-builder
         [form]="form"
         [formConfig]="configs"
         [defaultValue]="defaultValue"

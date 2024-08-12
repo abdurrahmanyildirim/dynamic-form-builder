@@ -21,7 +21,7 @@ import { DynamicFormBuilderService } from './services/dynamic-form-builder.servi
 import { debounceTime } from 'rxjs';
 
 @Component({
-  selector: 'app-dynamic-form-builder',
+  selector: 'eta-dynamic-form-builder',
   standalone: true,
   imports: [ReactiveFormsModule, FieldBuilderComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -29,7 +29,7 @@ import { debounceTime } from 'rxjs';
   template: `
     <form [formGroup]="form()" style="width: min-content;">
       @for (config of formConfig(); track config.key || $index) {
-        <app-field-builder [config]="config" [dir]="''" />
+        <eta-field-builder [config]="config" [dir]="''" />
       }
     </form>
   `,

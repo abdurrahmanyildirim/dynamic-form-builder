@@ -16,7 +16,7 @@ import { TextFieldComponent } from './fields/text/text-field.component';
 import { parentFormGroupProvider } from '../util';
 
 @Component({
-  selector: 'app-field-builder',
+  selector: 'eta-field-builder',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
@@ -50,13 +50,13 @@ import { parentFormGroupProvider } from '../util';
       <span [style.display]="hide() ? 'none' : ''">
         @if (!hide()) {
           @if (customFieldType(); as cType) {
-            <ng-container appCustomFieldBuilder [type]="cType" />
+            <ng-container etaCustomFieldBuilder [type]="cType" />
           } @else if (hasChildren()) {
             <div class="container" [class]="c.class">
               @if (c.key) {
                 <ng-container [formGroupName]="c.key">
                   @for (item of c.children; track item.key || $index) {
-                    <app-field-builder
+                    <eta-field-builder
                       [config]="item"
                       [dir]="dir() ? dir() + '.' + c.key : c.key"
                     />
@@ -64,7 +64,7 @@ import { parentFormGroupProvider } from '../util';
                 </ng-container>
               } @else {
                 @for (item of c.children; track item.key || $index) {
-                  <app-field-builder [config]="item" [dir]="dir()" />
+                  <eta-field-builder [config]="item" [dir]="dir()" />
                 }
               }
             </div>

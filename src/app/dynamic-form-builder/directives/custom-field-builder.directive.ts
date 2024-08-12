@@ -8,7 +8,7 @@ import { Directive, inject, input, ViewContainerRef } from '@angular/core';
  * and configured at runtime.
  */
 @Directive({
-  selector: '[appCustomFieldBuilder]',
+  selector: '[etaCustomFieldBuilder]',
   standalone: true,
 })
 export class CustomFieldBuilderDirective implements AfterViewInit {
